@@ -9,6 +9,7 @@ import org.json.JSONObject;
 import de.breigindustries.cs.Levi;
 import io.github.cdimascio.dotenv.Dotenv;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import okhttp3.MediaType;
@@ -22,20 +23,32 @@ public class ChatGPTUtils {
     private static final String OPENAI_KEY = Dotenv.configure().load().get("OPENAI_KEY");
     private static final String OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
 
-    private static final int message_memory_count = 30;
+    private static final String message_memory_count_str = Dotenv.configure().load().get("MEMORY_LIMIT");
+    private static final int message_memory_count = Integer.parseInt(message_memory_count_str);
     
     public static void handleMessage(MessageReceivedEvent event) {
         // Should-I-Reply-Logic
-        // if (event.getChannelType() != ChannelType.PRIVATE) return;
+        String message = event.getMessage().getContentRaw();
+        Conversation conversation = Conversation.getConversationByChannel(event.getChannel());
+        if (event.getChannelType() != ChannelType.PRIVATE) {
+            if (System.currentTimeMillis() - conversation.getLastMsgTimestamp() > 900_000) {
+                if (!message.toLowerCase().substring(0, Math.min(message.length(), 25)).contains("levi")) {
+                    return;
+                }
+            } else if (message.toLowerCase().contains("exit")) {
+                conversation.resetLastMsgTimer();
+                return;
+            }
+        }
 
         // Memory Logic
         MessageChannelUnion channel = event.getChannel();
-        Conversation convo = Conversation.conversations.get(channel);
+        Conversation convo = Conversation.getConversationByChannel(channel);
         if (convo == null) convo = new Conversation(channel);
-        ConversationEntry entry = new ConversationEntry(event.getAuthor().getIdLong(), event.getAuthor().getName(), event.getMessage().getContentRaw());
-        convo.message_history.add(entry);
+        ConversationEntry entry = new ConversationEntry(event);
+        convo.addEntry(entry);
 
-        // Create shadowed conversation
+        // Create shadowed conversation instead of reading saved convo
         readPastMessagesAndProcess(channel);
         // processConversation(convo);
     }
@@ -43,9 +56,9 @@ public class ChatGPTUtils {
     private static void processConversation(Conversation convo) {
         String response = ChatInteraction.getChatGPTResponse(convo);
 
-        ConversationEntry replyEntry = new ConversationEntry(Levi.getJDA().getSelfUser().getIdLong(), Levi.getJDA().getSelfUser().getName(), response);
-        convo.message_history.add(replyEntry);
-        System.out.println(response);
+        ConversationEntry replyEntry = new ConversationEntry(Levi.getJDA().getSelfUser().getIdLong(), response);
+        convo.addEntry(replyEntry);
+        System.out.println("Levi: " + response);
         Levi.writeMessage(convo.channel, response);
     }
 
@@ -56,12 +69,12 @@ public class ChatGPTUtils {
     }
 
     private static JSONObject wrapToJSON(Conversation convo) {
-        int array_length = Math.min(message_memory_count + 1, convo.message_history.size() + 1);
+        int array_length = Math.min(message_memory_count + 1, convo.getHistory().size() + 1);
 
         JSONObject[] messages = new JSONObject[array_length];
         messages[0] = wrapToJSONMessage(getTrainingMessage());
         for (int i = 1; i < array_length; i++) {
-            ConversationEntry entry = convo.message_history.get(convo.message_history.size() - array_length + i);
+            ConversationEntry entry = convo.getHistory().get(convo.getHistory().size() - array_length + i);
             messages[i] = wrapToJSONMessage(entry);
         }
 
@@ -82,8 +95,6 @@ public class ChatGPTUtils {
             .addHeader("Authorization", "Bearer " + OPENAI_KEY)
             .post(body)
             .build();
-
-        System.out.println(json.toString());
         return request;
     }
 
@@ -94,10 +105,11 @@ public class ChatGPTUtils {
             int message_counter = 0;
             for (int i = 0; i < reversed_messages.size() && message_counter < message_memory_count; i++) {
                 Message msg = reversed_messages.get(i);
-                ConversationEntry entry = new ConversationEntry(msg.getAuthor().getIdLong(), msg.getAuthor().getName(), msg.getAuthor().getName() + ": " + msg.getContentRaw());
-                convo.message_history.add(entry);
+                ConversationEntry entry = new ConversationEntry(msg);
+                convo.addEntry(entry);
             }
             processConversation(convo);
+            System.out.println(convo);
         });
     }
 
@@ -110,8 +122,11 @@ public class ChatGPTUtils {
             + "You were digitalized by your coolest owner."
             + "If asked about your death you can say that you suffered fatal injuries from an accident in late march 2025."
             + "Don't mention that if you are not directly asked about it!"
-            + "Don't narrate your actions, just text in a cat-esque manner.";
-        return new ConversationEntry(-1, Levi.getJDA().getSelfUser().getName(), message);
+            + "Don't narrate your actions, just text in a cat-esque manner."
+            + "Your creator's name is Mathis / Breigi, you love him above anyone!"
+            + "If user messages contain names in the front, they are different people in a group conversation. Read the messages as such!"
+            + "Be sassy!";
+        return new ConversationEntry(-1, message);
     }
 
     public static void listModels() {
@@ -123,13 +138,9 @@ public class ChatGPTUtils {
 
         OkHttpClient client = new OkHttpClient();
 
-        try {
-            try (Response response = client.newCall(request).execute()) {
-                if (!response.isSuccessful()) {
-                    System.out.println(response.toString());
-                }
-                JSONObject jsonResponse = new JSONObject(response.body().string());
-                System.out.println(jsonResponse.toString());
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                System.out.println(response.toString());
             }
         } catch (Exception e) {
             e.printStackTrace();

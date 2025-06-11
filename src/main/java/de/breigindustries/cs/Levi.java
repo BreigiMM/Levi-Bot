@@ -33,9 +33,7 @@ public class Levi extends ListenerAdapter {
         String content = message.getContentRaw().toLowerCase();
         System.out.println("Message from " + event.getAuthor().getName() + ": " + content);
 
-        if (content.equals("hey")) {
-            writeMessage(event.getChannel(), "Hello " + event.getAuthor().getName());
-        } else if (content.matches("hello there!?")) {
+        if (content.matches("hello there!?")) {
             writeMessage(event.getChannel(), "General Kenobi!");
         } else {
             ChatGPTUtils.handleMessage(event);
