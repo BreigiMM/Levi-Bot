@@ -1,42 +1,55 @@
 package de.breigindustries.cs.chatgpt;
 
-import de.breigindustries.cs.Levi;
-import net.dv8tion.jda.api.entities.Member;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.entities.channel.ChannelType;
-import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
-public record ConversationEntry(long user_id, String message) {
-    public ConversationEntry(MessageReceivedEvent event) {
-        this(event.getAuthor().getIdLong(), formatMessage(event));
+public class ConversationEntry {
+    private final long userId;
+    private final long messageId;
+    private final Timestamp timestamp;
+    private final String content;
+
+    // Store historical user- and display names for efficient and offline queueing
+    private final String username;
+    private final String displayName;
+
+    public ConversationEntry(Message message, String nickname) {
+        User author = message.getAuthor();
+        this.userId = author.getIdLong();
+        this.messageId = message.getIdLong();
+        OffsetDateTime timeCreated = message.getTimeCreated();
+        Instant instant = timeCreated.toInstant();
+        this.timestamp = Timestamp.from(instant);
+        this.content = message.getContentDisplay();
+        this.username = author.getName();
+        this.displayName = nickname;
     }
 
-    public ConversationEntry(Message message) {
-        this(message.getAuthor().getIdLong(), formatMessage(message, !isPrivateChannel(message.getChannel())));
+    /**
+     * Returns content formatted for group chat processing, i.e. including the name in the start of the message
+     */
+    public String getGroupchatContent() {
+        return displayName + " (" + username + "): " + content;
     }
 
-    private static String formatMessage(MessageReceivedEvent event) {
-        return formatMessage(event.getMessage(), !isPrivateChannel(event.getChannel()));
-    }
+    public long getUserId() { return userId; }
+    public long getMessageId() { return messageId; }
+    public Timestamp getTimestamp() { return timestamp; }
+    public String getContent() { return content; }
+    
+    public String getUsername() { return username; }
+    public String getDisplayName() { return displayName; }
 
-    private static String formatMessage(Message msg, boolean channel_is_group_chat) {
-        User author = msg.getAuthor();
-        Member member = msg.getMember();
-        if (author.getIdLong() == Levi.getJDA().getSelfUser().getIdLong()) channel_is_group_chat = false; // Make him omit his name
-        String message = msg.getContentRaw();
-
-        if (!channel_is_group_chat) {
-            return message;
-        } else {
-            String nickname = author.getEffectiveName();
-            String author_name = author.getEffectiveName() + " (" + author.getName() + ")";
-            return author_name + ": " + message;
-        }
-    }
-
-    public static boolean isPrivateChannel(MessageChannelUnion channel) {
-        return channel.getType() == ChannelType.PRIVATE;
+    @Override
+    public String toString() {
+        LocalDateTime dateTime = timestamp.toLocalDateTime();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("[dd.MM.yyyy HH:mm:ss] ");
+        return dateTime.format(formatter) + content;
     }
 }

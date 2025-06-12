@@ -2,16 +2,11 @@ package de.breigindustries.cs.chatgpt;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 import org.json.JSONObject;
 
 import de.breigindustries.cs.Levi;
 import io.github.cdimascio.dotenv.Dotenv;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.channel.ChannelType;
-import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -22,72 +17,30 @@ public class ChatGPTUtils {
 
     private static final String OPENAI_KEY = Dotenv.configure().load().get("OPENAI_KEY");
     private static final String OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
+    private static final OkHttpClient client = new OkHttpClient();
 
-    private static final String message_memory_count_str = Dotenv.configure().load().get("MEMORY_LIMIT");
-    private static final int message_memory_count = Integer.parseInt(message_memory_count_str);
-    
-    public static void handleMessage(MessageReceivedEvent event) {
-        // Should-I-Reply-Logic
-        String message = event.getMessage().getContentRaw();
-        Conversation conversation = Conversation.getConversationByChannel(event.getChannel());
-        if (event.getChannelType() != ChannelType.PRIVATE) {
-            if (System.currentTimeMillis() - conversation.getLastMsgTimestamp() > 900_000) {
-                if (!message.toLowerCase().substring(0, Math.min(message.length(), 25)).contains("levi")) {
-                    return;
-                }
-            } else if (message.toLowerCase().contains("exit")) {
-                conversation.resetLastMsgTimer();
-                return;
+    public static String getChatbotResponse(Conversation conversation) {
+        Request request = createHTTPRequest(conversation);
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                System.out.println(response.toString());
+                return "Error: Levi is tired right now and can only think of catnip..";
             }
+            JSONObject jsonResponse = new JSONObject(response.body().string());
+            return jsonResponse.getJSONArray("choices")
+                .getJSONObject(0)
+                .getJSONObject("message")
+                .getString("content")
+                .trim();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Error: Levi is tired right now and can only think of catnip...";
         }
-
-        // Memory Logic
-        MessageChannelUnion channel = event.getChannel();
-        Conversation convo = Conversation.getConversationByChannel(channel);
-        if (convo == null) convo = new Conversation(channel);
-        ConversationEntry entry = new ConversationEntry(event);
-        convo.addEntry(entry);
-
-        // Create shadowed conversation instead of reading saved convo
-        readPastMessagesAndProcess(channel);
-        // processConversation(convo);
     }
 
-    private static void processConversation(Conversation convo) {
-        String response = ChatInteraction.getChatGPTResponse(convo);
-
-        ConversationEntry replyEntry = new ConversationEntry(Levi.getJDA().getSelfUser().getIdLong(), response);
-        convo.addEntry(replyEntry);
-        System.out.println("Levi: " + response);
-        Levi.writeMessage(convo.channel, response);
-    }
-
-    private static JSONObject wrapToJSONMessage(ConversationEntry entry) {
-        boolean from_assistant = entry.user_id() == Levi.getJDA().getSelfUser().getIdLong();
-        String flag = from_assistant ? "assistant" : "user";
-        return new JSONObject().put("role", entry.user_id() == -1 ? "system" : flag).put("content", entry.message());
-    }
-
-    private static JSONObject wrapToJSON(Conversation convo) {
-        int array_length = Math.min(message_memory_count + 1, convo.getHistory().size() + 1);
-
-        JSONObject[] messages = new JSONObject[array_length];
-        messages[0] = wrapToJSONMessage(getTrainingMessage());
-        for (int i = 1; i < array_length; i++) {
-            ConversationEntry entry = convo.getHistory().get(convo.getHistory().size() - array_length + i);
-            messages[i] = wrapToJSONMessage(entry);
-        }
-
-        JSONObject json = new JSONObject();
-        json.put("model", "gpt-4o-mini");
-        json.put("messages", messages);
-        json.put("temperature", 0.7);
-        return json;
-    }
-
-    public static Request wrapToRequest(Conversation convo) {
-        JSONObject json = wrapToJSON(convo);
-        String jsonString = json.toString();
+    public static Request createHTTPRequest(Conversation conversation) {
+        JSONObject conversationJSON = convertConversationToJSON(conversation);
+        String jsonString = conversationJSON.toString();
         RequestBody body = RequestBody.create(jsonString, MediaType.parse("application/json"));
         Request request = new Request.Builder()
             .url(OPENAI_API_URL)
@@ -98,22 +51,39 @@ public class ChatGPTUtils {
         return request;
     }
 
-    private static void readPastMessagesAndProcess(MessageChannelUnion channel) {
-        Conversation convo = new Conversation(channel, false);
-        channel.getHistory().retrievePast(message_memory_count).queue(messages -> {
-            List<Message> reversed_messages = messages.reversed();
-            int message_counter = 0;
-            for (int i = 0; i < reversed_messages.size() && message_counter < message_memory_count; i++) {
-                Message msg = reversed_messages.get(i);
-                ConversationEntry entry = new ConversationEntry(msg);
-                convo.addEntry(entry);
-            }
-            processConversation(convo);
-            System.out.println(convo);
-        });
+    public static JSONObject convertConversationToJSON(Conversation conversation) {
+        JSONObject[] entryJSONS = new JSONObject[conversation.size() + 1]; // Reserve space for the conditioning message
+        entryJSONS[0] = getTrainingMessageJSON();
+        for (int i = 1; i < entryJSONS.length; i++) {
+            ConversationEntry entry = conversation.getMessages().get(i-1);
+            entryJSONS[i] = convertEntryToJSON(entry, !conversation.isPrivate());
+        }
+
+        // Assemble conversation and add metadata
+        JSONObject conversationJSON = new JSONObject();
+        conversationJSON.put("model", "gpt-4o-mini");
+        conversationJSON.put("messages", entryJSONS);
+        conversationJSON.put("temperature", 0.7);
+        return conversationJSON;
     }
 
-    private static ConversationEntry getTrainingMessage() {
+    private static JSONObject convertEntryToJSON(ConversationEntry entry, boolean formatForGroupChat) {
+        // Determine role
+        String role;
+        if (entry.getUserId() == Levi.getIdLong()) {
+            role = "assistant";
+        } else {
+            role = "user";
+        }
+
+        // Formatting content?
+        String content = formatForGroupChat ? entry.getGroupchatContent() : entry.getContent();
+        
+        // Creating JSON
+        return new JSONObject().put("role", role).put("content", content);
+    }
+
+    private static JSONObject getTrainingMessageJSON() {
         ZonedDateTime now = ZonedDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy");
         String date = now.format(formatter);
@@ -126,7 +96,8 @@ public class ChatGPTUtils {
             + "Your creator's name is Mathis / Breigi, you love him above anyone!"
             + "If user messages contain names in the front, they are different people in a group conversation. Read the messages as such!"
             + "Be sassy!";
-        return new ConversationEntry(-1, message);
+        
+        return new JSONObject().put("role", "system").put("content", message);
     }
 
     public static void listModels() {
