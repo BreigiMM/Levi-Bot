@@ -1,8 +1,5 @@
 package de.breigindustries.cs.chatgpt;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import de.breigindustries.cs.Levi;
 import io.github.cdimascio.dotenv.Dotenv;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -10,7 +7,6 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 public class AIInteraction {
 
     private static int memoryLimit = Integer.parseInt(Dotenv.configure().load().get("MEMORY_LIMIT"));
-    private static final Logger logger = LoggerFactory.getLogger(AIInteraction.class);
 
     /**
      * Makes Levi do AI-assisted conversation.
@@ -22,7 +18,6 @@ public class AIInteraction {
         Conversation conversation = Conversation.getConversationByMessageReceivedEvent(event);
         conversation.addEntryFromMessage(event.getMessage());
 
-        logger.debug("converse called, conversation created!");
         Conversation channelConversation = Conversation.createEmptyConversationFromMessageReceivedEvent(event);
         Conversation.fillConversation(channelConversation, memoryLimit).thenAccept(filledConversation -> {
             String response = ChatGPTUtils.getChatbotResponse(channelConversation);
@@ -32,6 +27,5 @@ public class AIInteraction {
                 conversation.addEntryFromMessage(sentMessage);
             });
         });
-        logger.debug("end of converse method");
-    } 
+    }
 }

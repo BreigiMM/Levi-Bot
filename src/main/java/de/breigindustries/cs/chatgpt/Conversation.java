@@ -1,6 +1,7 @@
 package de.breigindustries.cs.chatgpt;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -168,9 +169,9 @@ public class Conversation {
 
         // Fetch the history
         channel.getHistory().retrievePast(messageLimit).queue(messages -> {
-            List<Message> reversedMessages = messages.reversed();
-            for (int i = 0; i < reversedMessages.size(); i++) {
-                Message msg = reversedMessages.get(i);
+            Collections.reverse(messages);
+            for (int i = 0; i < messages.size(); i++) {
+                Message msg = messages.get(i);
                 ConversationEntry entry = new ConversationEntry(msg, conversation.getNicknameOfUser(msg.getAuthor()));
                 conversation.getMessages().add(entry);
             }
