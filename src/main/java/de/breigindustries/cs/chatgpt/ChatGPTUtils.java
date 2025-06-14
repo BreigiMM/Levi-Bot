@@ -36,7 +36,7 @@ public class ChatGPTUtils {
             logger.info("Got response from model: {}", stringResponse);
             return stringResponse;
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Could not get response from OpenAI: {}", e.getMessage());
             return "Error: Levi is tired right now and can only think of catnip...";
         }
     }

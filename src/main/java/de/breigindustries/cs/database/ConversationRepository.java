@@ -48,6 +48,7 @@ public class ConversationRepository {
 
         // Save the entries
         saveNewEntries(conversation.getChannelId(), conversation.getMessages());
+        logger.info("Saved conversation " + conversation.getChannelName() + " in " + conversation.getGuildName());
     }
 
     private static void saveNewEntries(long channelId, List<ConversationEntry> entries) {

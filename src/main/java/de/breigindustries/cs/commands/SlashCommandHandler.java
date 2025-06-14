@@ -2,7 +2,6 @@ package de.breigindustries.cs.commands;
 
 import java.util.List;
 
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,14 +22,7 @@ public class SlashCommandHandler extends ListenerAdapter {
 
     List<CommandData> botCommands = List.of(
         Commands.slash("ping", "Replies with Pong!"),
-        Commands.slash("ph1", "Placeholder 1"),
-        Commands.slash("ph2", "Placeholder 2"),
-        Commands.slash("ph3", "Placeholder 3"),
-        Commands.slash("ph4", "Placeholder 4"),
-        Commands.slash("ph5", "Placeholder 5"),
-        Commands.slash("ph6", "Placeholder 6"),
-        Commands.slash("ph7", "Placeholder 8"),
-        Commands.slash("ph9", "Placeholder 9")
+        Commands.slash("menu", "Shows Levi's menu")
     );
     List<CommandData> guildCommands = List.of(
         Commands.slash("phg1", "Placeholder Guild 1")
@@ -38,7 +30,7 @@ public class SlashCommandHandler extends ListenerAdapter {
     );
     
     @Override
-    public void onReady(@NotNull ReadyEvent event) {
+    public void onReady(ReadyEvent event) {
         logger.info("Received ReadyEvent");
 
         // Update bot commands
@@ -64,9 +56,16 @@ public class SlashCommandHandler extends ListenerAdapter {
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
+        logger.debug("Command " + event.getCommandString() + " was called by user {}", event.getUser().getEffectiveName());
+
         switch (event.getName()) {
+            // Bot commands
             case "ping" -> event.reply("Pong!").setEphemeral(true).queue();
+            case "menu" -> Menu.showMenu(event);
+
+            // Guild commands
             case "phg1" -> ConversationViewer.displayMessage(event);
+            default -> logger.error("Command {} could not be found!", event.getCommandString());
         }
     }
 

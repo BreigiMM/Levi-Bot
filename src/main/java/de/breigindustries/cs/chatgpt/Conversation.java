@@ -191,7 +191,10 @@ public class Conversation {
             
             // Ping completion
             future.complete(conversation);
-        }, future::completeExceptionally);
+        }, ex -> {
+            future.completeExceptionally(ex);
+            logger.error("Could not fill conversation {} - {} with messages!", conversation.getChannelName(), conversation.getGuildName());
+        });
 
         return future;
     }

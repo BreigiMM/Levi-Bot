@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import de.breigindustries.cs.chatgpt.AIInteraction;
 import de.breigindustries.cs.chatgpt.Conversation;
+import de.breigindustries.cs.commands.ButtonHandler;
 import de.breigindustries.cs.commands.SlashCommandHandler;
 import de.breigindustries.cs.database.DatabaseManager;
 import io.github.cdimascio.dotenv.Dotenv;
@@ -40,12 +41,12 @@ public class Levi extends ListenerAdapter {
         logger.info("About to build JDA...");
         jda = JDABuilder.createDefault(token)
             .enableIntents(GatewayIntent.MESSAGE_CONTENT)
-            .addEventListeners(new Levi(), new SlashCommandHandler())
+            .addEventListeners(new Levi(), new SlashCommandHandler(), new ButtonHandler())
             .build();
-        logger.info("JDA build successfully");
+        logger.info("JDA built successfully");
         jda.awaitReady();
 
-        System.out.println("Logged on as " + jda.getSelfUser().getName());
+        logger.info("Logged on as " + jda.getSelfUser().getEffectiveName());
     }
 
     @Override
@@ -54,7 +55,7 @@ public class Levi extends ListenerAdapter {
 
         Message message = event.getMessage();
         String content = message.getContentRaw().toLowerCase();
-        System.out.println("Message from " + event.getAuthor().getName() + ": " + content);
+        logger.info("Received a message from " + event.getAuthor().getEffectiveName() + ": {}", content);
 
         if (shouldReply(event)) {
             AIInteraction.converse(event);
@@ -105,8 +106,11 @@ public class Levi extends ListenerAdapter {
         }
         channel.sendMessage(message).queue(sentMessage -> {
             future.complete(sentMessage);
-            System.out.println(message);
-        }, future::completeExceptionally);
+            logger.info("Wrote message in chat: {}", sentMessage.getContentDisplay());
+        }, ex -> {
+            future.completeExceptionally(ex);
+            logger.error("Failed to write message in chat: {}", ex.getMessage());
+        });
 
         return future;
     }
