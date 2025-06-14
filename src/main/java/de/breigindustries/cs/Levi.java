@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 
 import de.breigindustries.cs.chatgpt.AIInteraction;
 import de.breigindustries.cs.chatgpt.Conversation;
+import de.breigindustries.cs.commands.SlashCommandHandler;
+import de.breigindustries.cs.database.DatabaseManager;
 import io.github.cdimascio.dotenv.Dotenv;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -21,6 +23,7 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 public class Levi extends ListenerAdapter {
 
     private static final Logger logger = LoggerFactory.getLogger(Levi.class);
+    private static final Dotenv dotenv = Dotenv.configure().load();
 
     private static JDA jda;
     public static JDA getJDA() { return jda; }
@@ -28,14 +31,20 @@ public class Levi extends ListenerAdapter {
     public static long getIdLong() { return jda.getSelfUser().getIdLong(); }
 
     public static void main(String[] args) throws Exception {
-        String token = Dotenv.configure().load().get("DISCORD_TOKEN");
+
+        // Set up database
+        DatabaseManager.ensureDatabaseExists();
+
+        // Start and connect to discord
+        String token = dotenv.get("DISCORD_TOKEN");
         logger.info("About to build JDA...");
         jda = JDABuilder.createDefault(token)
             .enableIntents(GatewayIntent.MESSAGE_CONTENT)
-            .addEventListeners(new Levi())
+            .addEventListeners(new Levi(), new SlashCommandHandler())
             .build();
         logger.info("JDA build successfully");
         jda.awaitReady();
+
         System.out.println("Logged on as " + jda.getSelfUser().getName());
     }
 

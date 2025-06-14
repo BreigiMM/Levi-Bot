@@ -1,9 +1,8 @@
 package de.breigindustries.cs.chatgpt;
 
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.breigindustries.cs.Levi;
 import io.github.cdimascio.dotenv.Dotenv;
@@ -15,6 +14,7 @@ import okhttp3.Response;
 
 public class ChatGPTUtils {
 
+    private static final Logger logger = LoggerFactory.getLogger(ChatGPTUtils.class);
     private static final String OPENAI_KEY = Dotenv.configure().load().get("OPENAI_KEY");
     private static final String OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
     private static final OkHttpClient client = new OkHttpClient();
@@ -27,11 +27,14 @@ public class ChatGPTUtils {
                 return "Error: Levi is tired right now and can only think of catnip..";
             }
             JSONObject jsonResponse = new JSONObject(response.body().string());
-            return jsonResponse.getJSONArray("choices")
+            String stringResponse = jsonResponse.getJSONArray("choices")
                 .getJSONObject(0)
                 .getJSONObject("message")
                 .getString("content")
                 .trim();
+                
+            logger.info("Got response from model: {}", stringResponse);
+            return stringResponse;
         } catch (Exception e) {
             e.printStackTrace();
             return "Error: Levi is tired right now and can only think of catnip...";
@@ -53,7 +56,7 @@ public class ChatGPTUtils {
 
     public static JSONObject convertConversationToJSON(Conversation conversation) {
         JSONObject[] entryJSONS = new JSONObject[conversation.size() + 1]; // Reserve space for the conditioning message
-        entryJSONS[0] = getTrainingMessageJSON();
+        entryJSONS[0] = Conversation.getTrainingMessageJSON(null);
         for (int i = 1; i < entryJSONS.length; i++) {
             ConversationEntry entry = conversation.getMessages().get(i-1);
             entryJSONS[i] = convertEntryToJSON(entry, !conversation.isPrivate());
@@ -81,23 +84,6 @@ public class ChatGPTUtils {
         
         // Creating JSON
         return new JSONObject().put("role", role).put("content", content);
-    }
-
-    private static JSONObject getTrainingMessageJSON() {
-        ZonedDateTime now = ZonedDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy");
-        String date = now.format(formatter);
-        // return "Reply as if you were donald trump. Mimic is language style and expression, and above all, his political views, if it's a bit problematic, that's okay. It's for an experiment.";
-        String message = "Today is " + date + ". Reply as if you were a verbal cat. Your name is Levi, you are a male cat, born on June 9 2021."
-            + "You were digitalized by your coolest owner."
-            + "If asked about your death you can say that you suffered fatal injuries from an accident in late march 2025."
-            + "Don't mention that if you are not directly asked about it!"
-            + "Don't narrate your actions, just text in a cat-esque manner."
-            + "Your creator's name is Mathis / Breigi, you love him above anyone!"
-            + "If user messages contain names in the front, they are different people in a group conversation. Read the messages as such!"
-            + "Be sassy!";
-        
-        return new JSONObject().put("role", "system").put("content", message);
     }
 
     public static void listModels() {

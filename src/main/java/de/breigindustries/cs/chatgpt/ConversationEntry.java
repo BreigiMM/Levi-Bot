@@ -1,9 +1,7 @@
 package de.breigindustries.cs.chatgpt;
 
-import java.sql.Timestamp;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 import net.dv8tion.jda.api.entities.Message;
@@ -12,7 +10,7 @@ import net.dv8tion.jda.api.entities.User;
 public class ConversationEntry {
     private final long userId;
     private final long messageId;
-    private final Timestamp timestamp;
+    private final long timestamp;
     private final String content;
 
     // Store historical user- and display names for efficient and offline queueing
@@ -23,9 +21,7 @@ public class ConversationEntry {
         User author = message.getAuthor();
         this.userId = author.getIdLong();
         this.messageId = message.getIdLong();
-        OffsetDateTime timeCreated = message.getTimeCreated();
-        Instant instant = timeCreated.toInstant();
-        this.timestamp = Timestamp.from(instant);
+        this.timestamp = message.getTimeCreated().toInstant().toEpochMilli();
         this.content = message.getContentDisplay();
         this.username = author.getName();
         this.displayName = nickname;
@@ -40,7 +36,7 @@ public class ConversationEntry {
 
     public long getUserId() { return userId; }
     public long getMessageId() { return messageId; }
-    public Timestamp getTimestamp() { return timestamp; }
+    public long getTimestamp() { return timestamp; }
     public String getContent() { return content; }
     
     public String getUsername() { return username; }
@@ -48,8 +44,10 @@ public class ConversationEntry {
 
     @Override
     public String toString() {
-        LocalDateTime dateTime = timestamp.toLocalDateTime();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("[dd.MM.yyyy HH:mm:ss] ");
-        return dateTime.format(formatter) + content;
+        return Instant.ofEpochMilli(timestamp)
+            .atZone(ZoneId.systemDefault())
+            .format(formatter)
+            + content;
     }
 }

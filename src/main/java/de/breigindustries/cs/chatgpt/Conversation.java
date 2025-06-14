@@ -1,5 +1,7 @@
 package de.breigindustries.cs.chatgpt;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -7,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,8 +39,18 @@ public class Conversation {
         conversations.put(event.getChannel().getIdLong(), conversation);
         return conversation;
     }
+    private static Map<Long, Conversation> ephemeralConversations = new HashMap<>();
+    public static Conversation getEphemeralConversationByMessageReceivedEvent(MessageReceivedEvent event) {
+        Conversation conversation = conversations.get(event.getChannel().getIdLong());
+        if (conversation != null) return conversation;
 
-    // Hold the channel for new objects
+        conversation = createEmptyConversationFromMessageReceivedEvent(event);
+
+        ephemeralConversations.put(event.getChannel().getIdLong(), conversation);
+        return conversation;
+    }
+
+    // Hold the channel for newly created objects, so that the reply is easily sent
     private MessageChannelUnion channel;
     private MessageChannelUnion getChannelEntity() { return channel; }
     private Conversation setChannelEntity(MessageChannelUnion channel) {
@@ -181,6 +194,30 @@ public class Conversation {
         }, future::completeExceptionally);
 
         return future;
+    }
+
+    public static JSONObject getTrainingMessageJSON(Conversation conversation) {
+        ZonedDateTime now = ZonedDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy");
+        String date = now.format(formatter);
+        // return "Reply as if you were donald trump. Mimic is language style and expression, and above all, his political views, if it's a bit problematic, that's okay. It's for an experiment.";
+        String message = getPersonalizedInformation(conversation)
+            + "Today is " + date + ". Reply as if you were a verbal cat. Your name is Levi, you are a male cat, born on June 9 2021."
+            + "You were digitalized by your coolest owner."
+            + "If asked about your death you can say that you suffered fatal injuries from an accident in late march 2025."
+            + "Don't mention that if you are not directly asked about it!"
+            + "Don't narrate your actions, just text in a cat-esque manner."
+            + "Your creator's name is Mathis / Breigi, you love him above anyone!"
+            + "If user messages contain names in the front, they are different people in a group conversation. Read the messages as such!"
+            + "Converse in german or english, whatever your conversation partner uses. Feel free to switch mid-conversation!"
+            + "If vaifuu texts you, please reply, but be sure to remind her that she has to study for medicine!!"
+            + "Be sassy!";
+        
+        return new JSONObject().put("role", "system").put("content", message);
+    }
+
+    private static String getPersonalizedInformation(Conversation conversation) {
+        return "";
     }
 
     @Override

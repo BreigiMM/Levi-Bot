@@ -1,11 +1,16 @@
 package de.breigindustries.cs.chatgpt;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.breigindustries.cs.Levi;
+import de.breigindustries.cs.database.ConversationRepository;
 import io.github.cdimascio.dotenv.Dotenv;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class AIInteraction {
 
+    private static Logger logger = LoggerFactory.getLogger(AIInteraction.class);
     private static int memoryLimit = Integer.parseInt(Dotenv.configure().load().get("MEMORY_LIMIT"));
 
     /**
@@ -25,6 +30,9 @@ public class AIInteraction {
             // Send the message in the channel
             Levi.writeMessage(event.getChannel(), response).thenAccept(sentMessage -> {
                 conversation.addEntryFromMessage(sentMessage);
+                channelConversation.addEntryFromMessage(sentMessage);
+                ConversationRepository.saveConversation(conversation);
+                logger.info("Wrote message in chat: {}", sentMessage.getContentDisplay());
             });
         });
     }
