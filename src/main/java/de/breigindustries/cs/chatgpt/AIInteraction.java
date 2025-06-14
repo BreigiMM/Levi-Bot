@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class AIInteraction {
 
-    // private static Logger logger = LoggerFactory.getLogger(AIInteraction.class);
+    // gprivate static Logger logger = LoggerFactory.getLogger(AIInteraction.class);
     private static int memoryLimit = Integer.parseInt(Dotenv.configure().load().get("MEMORY_LIMIT"));
 
     /**
