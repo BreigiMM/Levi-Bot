@@ -1,4 +1,4 @@
-package de.breigindustries.cs.commands;
+package de.breigindustries.cs.bot.commands;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,4 +1,4 @@
-package de.breigindustries.cs.chatgpt;
+package de.breigindustries.cs.bot.chatgpt;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -13,7 +13,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.breigindustries.cs.Levi;
+import de.breigindustries.cs.bot.Levi;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;

@@ -1,15 +1,15 @@
-package de.breigindustries.cs;
+package de.breigindustries.cs.bot;
 
 import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.breigindustries.cs.chatgpt.AIInteraction;
-import de.breigindustries.cs.chatgpt.Conversation;
-import de.breigindustries.cs.commands.ButtonHandler;
-import de.breigindustries.cs.commands.SlashCommandHandler;
-import de.breigindustries.cs.database.DatabaseManager;
+import de.breigindustries.cs.bot.chatgpt.AIInteraction;
+import de.breigindustries.cs.bot.chatgpt.Conversation;
+import de.breigindustries.cs.bot.commands.ButtonHandler;
+import de.breigindustries.cs.bot.commands.SlashCommandHandler;
+import de.breigindustries.cs.bot.database.DatabaseManager;
 import io.github.cdimascio.dotenv.Dotenv;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;

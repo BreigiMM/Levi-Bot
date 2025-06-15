@@ -1,4 +1,4 @@
-package de.breigindustries.cs.commands;
+package de.breigindustries.cs.bot.commands;
 
 import java.util.List;
 

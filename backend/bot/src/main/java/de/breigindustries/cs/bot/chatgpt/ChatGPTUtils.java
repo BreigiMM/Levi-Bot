@@ -1,10 +1,10 @@
-package de.breigindustries.cs.chatgpt;
+package de.breigindustries.cs.bot.chatgpt;
 
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.breigindustries.cs.Levi;
+import de.breigindustries.cs.bot.Levi;
 import io.github.cdimascio.dotenv.Dotenv;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;

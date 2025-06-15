@@ -1,4 +1,4 @@
-package de.breigindustries.cs.database;
+package de.breigindustries.cs.bot.database;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -9,8 +9,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.breigindustries.cs.chatgpt.Conversation;
-import de.breigindustries.cs.chatgpt.ConversationEntry;
+import de.breigindustries.cs.bot.chatgpt.Conversation;
+import de.breigindustries.cs.bot.chatgpt.ConversationEntry;
 
 public class ConversationRepository {
 

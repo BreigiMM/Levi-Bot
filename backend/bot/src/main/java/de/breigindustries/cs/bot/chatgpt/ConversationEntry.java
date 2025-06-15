@@ -1,4 +1,4 @@
-package de.breigindustries.cs.chatgpt;
+package de.breigindustries.cs.bot.chatgpt;
 
 import java.time.Instant;
 import java.time.ZoneId;

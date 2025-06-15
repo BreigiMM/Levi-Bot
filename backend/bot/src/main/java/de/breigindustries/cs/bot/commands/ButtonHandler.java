@@ -1,4 +1,4 @@
-package de.breigindustries.cs.commands;
+package de.breigindustries.cs.bot.commands;
 
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;

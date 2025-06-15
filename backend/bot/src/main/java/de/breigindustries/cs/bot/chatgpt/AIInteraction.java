@@ -1,7 +1,7 @@
-package de.breigindustries.cs.chatgpt;
+package de.breigindustries.cs.bot.chatgpt;
 
-import de.breigindustries.cs.Levi;
-import de.breigindustries.cs.database.ConversationRepository;
+import de.breigindustries.cs.bot.Levi;
+import de.breigindustries.cs.bot.database.ConversationRepository;
 import io.github.cdimascio.dotenv.Dotenv;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 

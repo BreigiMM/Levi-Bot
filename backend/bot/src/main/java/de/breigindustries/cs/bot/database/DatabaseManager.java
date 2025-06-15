@@ -1,4 +1,4 @@
-package de.breigindustries.cs.database;
+package de.breigindustries.cs.bot.database;
 
 import java.io.File;
 import java.io.FileNotFoundException;

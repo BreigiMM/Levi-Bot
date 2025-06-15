@@ -1,4 +1,4 @@
-package de.breigindustries.cs.commands;
+package de.breigindustries.cs.bot.commands;
 
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;

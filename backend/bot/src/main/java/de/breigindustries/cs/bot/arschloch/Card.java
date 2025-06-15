@@ -1,4 +1,4 @@
-package de.breigindustries.cs.arschloch;
+package de.breigindustries.cs.bot.arschloch;
 
 import java.util.Random;
 
