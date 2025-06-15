@@ -33,20 +33,23 @@ public class Levi extends ListenerAdapter {
 
     public static void main(String[] args) throws Exception {
 
-        // Set up database
-        DatabaseManager.ensureDatabaseExists();
+        return;
 
-        // Start and connect to discord
-        String token = dotenv.get("DISCORD_TOKEN");
-        logger.info("About to build JDA...");
-        jda = JDABuilder.createDefault(token)
-            .enableIntents(GatewayIntent.MESSAGE_CONTENT)
-            .addEventListeners(new Levi(), new SlashCommandHandler(), new ButtonHandler())
-            .build();
-        logger.info("JDA built successfully");
-        jda.awaitReady();
+        // // Set up database
+        // DatabaseManager.ensureDatabaseExists();
 
-        logger.info("Logged on as " + jda.getSelfUser().getEffectiveName());
+        // // Start and connect to discord
+        // String token = dotenv.get("DISCORD_TOKEN");
+        // logger.info("About to build JDA...");
+        // jda = JDABuilder.createDefault(token)
+        //     .enableIntents(GatewayIntent.MESSAGE_CONTENT)
+        //     .addEventListeners(new Levi(), new SlashCommandHandler(), new ButtonHandler())
+        //     .build();
+        // logger.info("JDA built successfully");
+        // jda.awaitReady();
+
+        // logger.info("Logged on as " + jda.getSelfUser().getEffectiveName());
+
     }
 
     @Override
@@ -107,9 +110,9 @@ public class Levi extends ListenerAdapter {
         channel.sendMessage(message).queue(sentMessage -> {
             future.complete(sentMessage);
             logger.info("Wrote message in chat: {}", sentMessage.getContentDisplay());
-        }, ex -> {
-            future.completeExceptionally(ex);
-            logger.error("Failed to write message in chat: {}", ex.getMessage());
+        }, throwable -> {
+            future.completeExceptionally(throwable);
+            logger.error("Failed to write message in chat: {}", throwable.getMessage());
         });
 
         return future;

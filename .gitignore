@@ -12,6 +12,7 @@ lerna-debug.log*
 
 # Database
 *.db
+!empty.db
 
 # Editor directories and files
 .vscode/*
