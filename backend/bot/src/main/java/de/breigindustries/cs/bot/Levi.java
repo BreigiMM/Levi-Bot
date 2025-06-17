@@ -15,7 +15,9 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.GuildWelcomeScreen.Channel;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -33,22 +35,37 @@ public class Levi extends ListenerAdapter {
 
     public static void main(String[] args) throws Exception {
 
-        return;
+        // Set up database
+        DatabaseManager.ensureDatabaseExists();
 
-        // // Set up database
-        // DatabaseManager.ensureDatabaseExists();
+        // Start and connect to discord
+        String token = dotenv.get("DISCORD_TOKEN");
+        logger.info("About to build JDA...");
+        jda = JDABuilder.createDefault(token)
+            .enableIntents(GatewayIntent.MESSAGE_CONTENT)
+            .addEventListeners(new Levi(), new SlashCommandHandler(), new ButtonHandler())
+            .build();
+        logger.info("JDA built successfully");
+        jda.awaitReady();
 
-        // // Start and connect to discord
-        // String token = dotenv.get("DISCORD_TOKEN");
-        // logger.info("About to build JDA...");
-        // jda = JDABuilder.createDefault(token)
-        //     .enableIntents(GatewayIntent.MESSAGE_CONTENT)
-        //     .addEventListeners(new Levi(), new SlashCommandHandler(), new ButtonHandler())
-        //     .build();
-        // logger.info("JDA built successfully");
-        // jda.awaitReady();
+        logger.info("Logged on as " + jda.getSelfUser().getEffectiveName());
 
-        // logger.info("Logged on as " + jda.getSelfUser().getEffectiveName());
+        // Text Jonas once
+        String jonasUserId = "759109066059677777";
+        User jonas = jda.retrieveUserById(jonasUserId).complete();
+        if (jonas == null) {
+            logger.error("Could not find Jonas with ID: " + jonasUserId);
+            return;
+        }
+
+        PrivateChannel pc = jonas.openPrivateChannel().complete();
+        if (pc == null) {
+            logger.error("Private channel could not be retrieved!");
+            return;
+        }
+
+        MessageChannelUnion channel = (MessageChannelUnion) pc;
+        writeMessage(channel, "Mrrrow~ Hey Damjan, Mathis meint du sollst unbedingt zurückkommen, sie sind so einsam ohne dich :(");
 
     }
 
