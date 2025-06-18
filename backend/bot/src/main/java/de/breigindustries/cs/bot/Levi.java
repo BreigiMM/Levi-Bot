@@ -51,21 +51,21 @@ public class Levi extends ListenerAdapter {
         logger.info("Logged on as " + jda.getSelfUser().getEffectiveName());
 
         // Text Jonas once
-        String jonasUserId = "759109066059677777";
-        User jonas = jda.retrieveUserById(jonasUserId).complete();
-        if (jonas == null) {
-            logger.error("Could not find Jonas with ID: " + jonasUserId);
-            return;
-        }
+        // String jonasUserId = "759109066059677777";
+        // User jonas = jda.retrieveUserById(jonasUserId).complete();
+        // if (jonas == null) {
+        //     logger.error("Could not find Jonas with ID: " + jonasUserId);
+        //     return;
+        // }
 
-        PrivateChannel pc = jonas.openPrivateChannel().complete();
-        if (pc == null) {
-            logger.error("Private channel could not be retrieved!");
-            return;
-        }
+        // PrivateChannel pc = jonas.openPrivateChannel().complete();
+        // if (pc == null) {
+        //     logger.error("Private channel could not be retrieved!");
+        //     return;
+        // }
 
-        MessageChannelUnion channel = (MessageChannelUnion) pc;
-        writeMessage(channel, "Mrrrow~ Hey Damjan, Mathis meint du sollst unbedingt zurückkommen, sie sind so einsam ohne dich :(");
+        // MessageChannelUnion channel = (MessageChannelUnion) pc;
+        // writeMessage(channel, "Mrrrow~ Hey Damjan, Mathis meint du sollst unbedingt zurückkommen, sie sind so einsam ohne dich :(");
 
     }
 
@@ -91,10 +91,14 @@ public class Levi extends ListenerAdapter {
         Conversation conversation = Conversation.getConversationByMessageReceivedEvent(event);
         
         // Always reply in DMs
-        if (event.getChannelType() == ChannelType.PRIVATE) return true;
+        if (event.getChannelType() == ChannelType.PRIVATE) {
+            return true;
+        }
 
         // Don't reply in channels other than private and text (also relevant for Conversation constructor)
-        if (event.getChannelType() != ChannelType.TEXT) return false;
+        if (event.getChannelType() != ChannelType.TEXT) {
+            return false;
+        }
         
         // Reset conversation on command
         int greetingScope = Math.min(message.length(), 25);
@@ -107,10 +111,14 @@ public class Levi extends ListenerAdapter {
         // Reply if the conversation is young (< 15 mins)
         long now = System.currentTimeMillis();
         long then = conversation.getLastMsgTimestamp();
-        if (now - then > 900_000) return true;
+        if (now - then < 900_000) {
+            return true;
+        }
 
         // Reply if the message is addressed to him
-        if (beginningOfMessage.contains("levi")) return true;
+        if (beginningOfMessage.contains("levi")) {
+            return true;
+        }
 
         return false;
     }

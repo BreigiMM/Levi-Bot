@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
+import de.breigindustries.cs.bot.Levi;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 
@@ -31,6 +32,8 @@ public class ConversationEntry {
      * Returns content formatted for group chat processing, i.e. including the name in the start of the message
      */
     public String getGroupchatContent() {
+        // Differentiate between bot messages and other messages
+        if (userId == Levi.getIdLong()) return content;
         return displayName + " (" + username + "): " + content;
     }
 

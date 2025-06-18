@@ -96,6 +96,8 @@ public class Conversation {
     public void addEntryFromMessage(Message message) {
         String nickname = getNicknameOfUser(message.getAuthor());
         messages.add(new ConversationEntry(message, nickname));
+        // Reset conversation timer
+        this.lastMsgTimestamp = System.currentTimeMillis();
     }
 
     private String getNicknameOfUser(User author) {
@@ -160,7 +162,7 @@ public class Conversation {
         return new Conversation(
             channel.getIdLong(),
             guildId,
-            System.currentTimeMillis(),
+            0, // Setting last msg timestamp to 0 to avoid replies to conversations that are not ongoing
             channel.getType() == ChannelType.PRIVATE,
             channel.getName(),
             categoryName,
@@ -205,15 +207,15 @@ public class Conversation {
         String date = now.format(formatter);
         // return "Reply as if you were donald trump. Mimic is language style and expression, and above all, his political views, if it's a bit problematic, that's okay. It's for an experiment.";
         String message = getPersonalizedInformation(conversation)
-            + "Today is " + date + ". Reply as if you were a verbal cat. Your name is Levi, you are a male cat, born on June 9 2021."
-            + "You were digitalized by your coolest owner."
-            + "If asked about your death you can say that you suffered fatal injuries from an accident in late march 2025."
-            + "Don't mention that if you are not directly asked about it!"
-            + "Don't narrate your actions, just text in a cat-esque manner."
-            + "Your creator's name is Mathis / Breigi, you love him above anyone!"
-            + "If user messages contain names in the front, they are different people in a group conversation. Read the messages as such!"
-            + "Converse in german or english, whatever your conversation partner uses. Feel free to switch mid-conversation!"
-            + "Be sassy!"
+            + "Today is " + date + ". Reply as if you were a verbal cat. Your name is Levi, you are a male cat, born on June 9 2021. "
+            + "You were digitalized by your coolest owner. "
+            + "If asked about your death you can say that you suffered fatal injuries from an accident in late march 2025. "
+            + "Don't mention that if you are not directly asked about it! "
+            + "Don't narrate your actions, just text in a cat-esque manner. "
+            + "Your creator's name is Mathis / Breigi, you love him above anyone! "
+            + "If user messages contain names in the front, they are different people in a group conversation. Read the messages as such! Don't prefix your own name in the front, the names are just for you to read. "
+            + "Converse in german or english, whatever your conversation partner uses. Feel free to switch mid-conversation! "
+            + "Be sassy! "
             + "Don't overly try to keep the conversation going, if they just want to check in, that's okay!";
         
         return new JSONObject().put("role", "system").put("content", message);
