@@ -17,10 +17,10 @@ public class AIInteraction {
      */
     public static void converse(MessageReceivedEvent event) {     
         // Memorizing the message sent
-        Conversation conversation = Conversation.getConversationByMessageReceivedEvent(event);
+        Conversation conversation = Conversation.getConversationByChannel(event.getChannel());
         conversation.addEntryFromMessage(event.getMessage());
 
-        Conversation channelConversation = Conversation.createEmptyConversationFromMessageReceivedEvent(event);
+        Conversation channelConversation = Conversation.createEmptyConversationFromChannel(event.getChannel());
         Conversation.fillConversation(channelConversation, memoryLimit).thenAccept(filledConversation -> {
             String response = ChatGPTUtils.getChatbotResponse(channelConversation);
 

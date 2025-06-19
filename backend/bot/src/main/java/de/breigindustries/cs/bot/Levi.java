@@ -93,7 +93,7 @@ public class Levi extends ListenerAdapter {
      */
     public static boolean shouldReply(MessageReceivedEvent event) {
         String message = event.getMessage().getContentRaw();
-        Conversation conversation = Conversation.getConversationByMessageReceivedEvent(event);
+        Conversation conversation = Conversation.getConversationByChannel(event.getChannel());
         
         // Always reply in DMs
         if (event.getChannelType() == ChannelType.PRIVATE) {

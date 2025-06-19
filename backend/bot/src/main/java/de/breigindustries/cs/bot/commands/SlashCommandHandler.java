@@ -5,6 +5,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.breigindustries.cs.bot.chatgpt.Conversation;
 import io.github.cdimascio.dotenv.Dotenv;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
@@ -22,7 +23,8 @@ public class SlashCommandHandler extends ListenerAdapter {
 
     List<CommandData> botCommands = List.of(
         Commands.slash("ping", "Replies with Pong!"),
-        Commands.slash("menu", "Shows Levi's menu")
+        Commands.slash("menu", "Shows Levi's menu"),
+        Commands.slash("pancake", "Makes Levi eat a special treat that makes him very smart :)")
     );
     List<CommandData> guildCommands = List.of(
         Commands.slash("phg1", "Placeholder Guild 1")
@@ -62,6 +64,11 @@ public class SlashCommandHandler extends ListenerAdapter {
             // Bot commands
             case "ping" -> event.reply("Pong!").setEphemeral(true).queue();
             case "menu" -> Menu.showMenu(event);
+            case "pancake" -> {
+                long channelID = event.getChannelIdLong();
+                Conversation conversation = Conversation.getConversationByChannel(event.getChannel());
+            }
+
 
             // Guild commands
             case "phg1" -> ConversationViewer.displayMessage(event);

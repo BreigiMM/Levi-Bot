@@ -64,7 +64,8 @@ public class ChatGPTUtils {
 
         // Assemble conversation and add metadata
         JSONObject conversationJSON = new JSONObject();
-        conversationJSON.put("model", "gpt-4o-mini");
+        String model = conversation.isPancakeMode() ? "gpt-4o" : "gpt-4o-mini";
+        conversationJSON.put("model", model);
         conversationJSON.put("messages", entryJSONS);
         conversationJSON.put("temperature", 0.7);
         return conversationJSON;
