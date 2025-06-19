@@ -15,9 +15,11 @@ lerna-debug.log*
 !empty.db
 
 # Downloads from attachments
+downloads
 downloads/*
 
 # Editor directories and files
+.vscode
 .vscode/*
 !.vscode/extensions.json
 .idea
