@@ -1,7 +1,14 @@
 package de.breigindustries.cs.bot;
 
+import java.awt.Color;
 import java.io.File;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +19,7 @@ import de.breigindustries.cs.bot.commands.ButtonHandler;
 import de.breigindustries.cs.bot.commands.SlashCommandHandler;
 import de.breigindustries.cs.bot.database.DatabaseManager;
 import io.github.cdimascio.dotenv.Dotenv;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Message;
@@ -44,7 +52,7 @@ public class Levi extends ListenerAdapter {
         }
 
         // Start and connect to discord
-        String token = dotenv.get("DEV_TOKEN");
+        String token = dotenv.get("DISCORD_TOKEN");
         logger.info("About to build JDA...");
         jda = JDABuilder.createDefault(token)
             .enableIntents(GatewayIntent.MESSAGE_CONTENT)
@@ -54,24 +62,6 @@ public class Levi extends ListenerAdapter {
         jda.awaitReady();
 
         logger.info("Logged on as " + jda.getSelfUser().getEffectiveName());
-
-        // Text Jonas once
-        // String jonasUserId = "759109066059677777";
-        // User jonas = jda.retrieveUserById(jonasUserId).complete();
-        // if (jonas == null) {
-        //     logger.error("Could not find Jonas with ID: " + jonasUserId);
-        //     return;
-        // }
-
-        // PrivateChannel pc = jonas.openPrivateChannel().complete();
-        // if (pc == null) {
-        //     logger.error("Private channel could not be retrieved!");
-        //     return;
-        // }
-
-        // MessageChannelUnion channel = (MessageChannelUnion) pc;
-        // writeMessage(channel, "Mrrrow~ Hey Damjan, Mathis meint du sollst unbedingt zurückkommen, sie sind so einsam ohne dich :(");
-
     }
 
     @Override
@@ -128,21 +118,75 @@ public class Levi extends ListenerAdapter {
         return false;
     }
 
-    public static CompletableFuture<Message> writeMessage(MessageChannelUnion channel, String message) {
+    public static List<CompletableFuture<Message>> writeMessage(MessageChannelUnion channel, String message) {
+        List<CompletableFuture<Message>> futures = new ArrayList<>();
+
+        // Render Latex and split into multiple messages
+        Pattern latexBlock = Pattern.compile("\\$\\$(.*?)\\$\\$", Pattern.DOTALL);
+        Matcher matcher = latexBlock.matcher(message);
+
+        int lastEnd = 0;
+        while (matcher.find()) {
+            int start = matcher.start();
+            int end = matcher.end();
+
+            // Send text before this LaTeX block
+            if (start > lastEnd) {
+                String textPart = message.substring(lastEnd, start).trim();
+                if (!textPart.isEmpty()) {
+                    futures.add(writeRawMessage(channel, textPart));
+                }
+            }
+
+            // Send the LaTeX as an embed
+            String latex = matcher.group(1);
+            String encoded = URLEncoder.encode(latex, StandardCharsets.UTF_8).replace("+", "%20");
+            String url = "https://latex.codecogs.com/png.image?\\dpi{300}%20\\bg_white%20\\large%20\\inline%20\\displaystyle" + encoded;
+            System.out.println(url);
+
+            EmbedBuilder embed = new EmbedBuilder()
+                .setImage(url)
+                .setColor(Color.RED);
+
+            CompletableFuture<Message> future = new CompletableFuture<>();
+            channel.sendMessageEmbeds(embed.build()).queue(sentEmbed -> {
+                future.complete(sentEmbed);
+                logger.debug("Sent an embed in chat: {}", sentEmbed.getContentDisplay());
+            }, throwable -> {
+                future.completeExceptionally(throwable);
+                logger.error("Failed to write message in chat: {}", throwable.getMessage());
+            });
+            futures.add(future);
+
+            lastEnd = end;
+        }
+
+        if (lastEnd < message.length()) {
+            String remaining = message.substring(lastEnd).trim();
+            if (!remaining.isEmpty()) {
+                futures.add(writeRawMessage(channel, remaining));
+            }
+        }
+
+        return futures;
+    }
+
+    private static CompletableFuture<Message> writeRawMessage(MessageChannelUnion channel, String message) {
         CompletableFuture<Message> future = new CompletableFuture<>();
-        
+
         channel.sendTyping().queue();
         try {
             Thread.sleep(message.length() * 10);        
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+
         channel.sendMessage(message).queue(sentMessage -> {
+            logger.debug("Wrote message in chat: {}", sentMessage.getContentDisplay());
             future.complete(sentMessage);
-            logger.info("Wrote message in chat: {}", sentMessage.getContentDisplay());
         }, throwable -> {
-            future.completeExceptionally(throwable);
             logger.error("Failed to write message in chat: {}", throwable.getMessage());
+            future.completeExceptionally(new RuntimeException("Message could not send!"));
         });
 
         return future;

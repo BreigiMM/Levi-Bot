@@ -6,6 +6,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -62,6 +64,13 @@ public class ConversationEntry {
     public String getDisplayName() { return displayName; }
 
     public static String getCompleteMessage(Message message) {
+        // Test if message isn't a latex embed
+        if (message.getAuthor().getIdLong() == Levi.getIdLong() && !message.getEmbeds().isEmpty()) {
+            String embedURL = message.getEmbeds().get(0).getImage().getUrl();
+            String decodedLatex = URLDecoder.decode(embedURL, StandardCharsets.UTF_8);
+            return decodedLatex;
+        }
+
         StringBuilder fullText = new StringBuilder(message.getContentDisplay()).append("\n");
 
         List<Attachment> attachments = message.getAttachments();

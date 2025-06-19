@@ -8,6 +8,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -98,6 +102,17 @@ public class Conversation {
         messages.add(new ConversationEntry(message, nickname));
         // Reset conversation timer
         this.lastMsgTimestamp = System.currentTimeMillis();
+
+        // Reset pancake mode timer if pancake mode is enabled
+        if (!pancakeMode) return;
+        if (schedule == null) {
+            logger.warn("Schedule was null, but pancake mode is still on! Aborting...");
+            return;
+        }
+        if (schedule.isDone()) return;
+        schedule.cancel(false);
+        // Schedule a new timer
+        setPancakeMode(channel);
     }
     
     private String getNicknameOfUser(User author) {
@@ -166,85 +181,104 @@ public class Conversation {
             channel.getName(),
             categoryName,
             guildName).setChannelEntity(channel);
-        }
+    }
+    
+    public static CompletableFuture<Conversation> fillConversation(Conversation conversation, int messageLimit) {
         
-        public static CompletableFuture<Conversation> fillConversation(Conversation conversation, int messageLimit) {
-            
-            CompletableFuture<Conversation> future = new CompletableFuture<>();
-            
-            // Fetch the channel by id
-            MessageChannelUnion channel = conversation.getChannelEntity();
-            if (channel == null) {
-                // Channel could not be found (might not have been "cached" according to ChatGPT)
-                future.completeExceptionally(new RuntimeException("Could not find the channel of the conversation"));
-                logger.error("Could not find the channel of the conversation!");
-                return future;
-            }
-            
-            // Fetch the history
-            channel.getHistory().retrievePast(messageLimit).queue(messages -> {
-                Collections.reverse(messages);
-                for (int i = 0; i < messages.size(); i++) {
-                    Message msg = messages.get(i);
-                    ConversationEntry entry = new ConversationEntry(msg, conversation.getNicknameOfUser(msg.getAuthor()));
-                    conversation.getMessages().add(entry);
-                }
-                
-                // Ping completion
-                future.complete(conversation);
-            }, ex -> {
-                future.completeExceptionally(ex);
-                logger.error("Could not fill conversation {} - {} with messages!", conversation.getChannelName(), conversation.getGuildName());
-            });
-            
+        CompletableFuture<Conversation> future = new CompletableFuture<>();
+        
+        // Fetch the channel by id
+        MessageChannelUnion channel = conversation.getChannelEntity();
+        if (channel == null) {
+            // Channel could not be found (might not have been "cached" according to ChatGPT)
+            future.completeExceptionally(new RuntimeException("Could not find the channel of the conversation"));
+            logger.error("Could not find the channel of the conversation!");
             return future;
         }
         
-        public static JSONObject getTrainingMessageJSON(Conversation conversation) {
-            ZonedDateTime now = ZonedDateTime.now();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy");
-            String date = now.format(formatter);
-            // return "Reply as if you were donald trump. Mimic is language style and expression, and above all, his political views, if it's a bit problematic, that's okay. It's for an experiment.";
-            String message = getPersonalizedInformation(conversation)
-            + "Today is " + date + ". Reply as if you were a verbal cat. Your name is Levi, you are a male cat, born on June 9 2021. "
-            + "You were digitalized by your coolest owner. "
-            + "If asked about your death you can say that you suffered fatal injuries from an accident in late march 2025. "
-            + "Don't mention that if you are not directly asked about it! "
-            + "Don't narrate your actions, just text in a cat-esque manner. "
-            + "Your creator's name is Mathis / Breigi, you love him above anyone! "
-            + "If user messages contain names in the front, they are different people in a group conversation. Read the messages as such! Don't prefix your own name in the front, the names are just for you to read. "
-            + "Converse in german or english, whatever your conversation partner uses. Feel free to switch mid-conversation! "
-            + "Be sassy! "
-            + "Don't overly try to keep the conversation going, if they just want to check in, that's okay!";
-            
-            return new JSONObject().put("role", "system").put("content", message);
-        }
-        
-        private static String getPersonalizedInformation(Conversation conversation) {
-            return "";
-        }
-    
-        // Keep track of pancake mode
-        private boolean pancakeMode = false;
-        private long pancakeTimestamp = 0;
-
-        public void setPancakeMode() {
-            this.pancakeMode = true;
-            this.pancakeTimestamp = System.currentTimeMillis();
-        }
-
-        public boolean isPancakeMode() {
-            return pancakeMode;
-        }
-        
-        @Override
-        public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append("--- Message History: " + guildName + " - " + categoryName + " - " + channelName + " ---");
-            for (ConversationEntry entry : messages) {
-                sb.append(entry.toString() + "\n");
+        // Fetch the history
+        channel.getHistory().retrievePast(messageLimit).queue(messages -> {
+            Collections.reverse(messages);
+            for (int i = 0; i < messages.size(); i++) {
+                Message msg = messages.get(i);
+                if (msg.getContentRaw().toLowerCase().contains("[info]") && msg.getAuthor().getIdLong() == Levi.getIdLong()) {
+                    msg.delete().queue();
+                    continue;
+                }
+                ConversationEntry entry = new ConversationEntry(msg, conversation.getNicknameOfUser(msg.getAuthor()));
+                conversation.getMessages().add(entry);
             }
-            return sb.toString();
-        }
+            
+            // Ping completion
+            future.complete(conversation);
+        }, ex -> {
+            future.completeExceptionally(ex);
+            logger.error("Could not fill conversation {} - {} with messages!", conversation.getChannelName(), conversation.getGuildName());
+        });
         
+        return future;
     }
+    
+    public static JSONObject getTrainingMessageJSON(Conversation conversation) {
+        ZonedDateTime now = ZonedDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy");
+        String date = now.format(formatter);
+        // return "Reply as if you were donald trump. Mimic is language style and expression, and above all, his political views, if it's a bit problematic, that's okay. It's for an experiment.";
+        String message = getPersonalizedInformation(conversation)
+        + "Today is " + date + ". Reply as if you were a verbal cat. Your name is Levi, you are a male cat, born on June 9 2021. "
+        + "You were digitalized by your coolest owner. "
+        + "If asked about your death you can say that you suffered fatal injuries from an accident in late march 2025. "
+        + "Don't mention that if you are not directly asked about it! "
+        + "Don't narrate your actions, just text in a cat-esque manner. "
+        + "Your creator's name is Mathis / Breigi, you love him above anyone! "
+        + "If user messages contain names in the front, they are different people in a group conversation. Read the messages as such! Don't prefix your own name in the front, the names are just for you to read. "
+        + "Converse in german or english, whatever your conversation partner uses. Feel free to switch mid-conversation! "
+        + "Be sassy! "
+        + "Don't overly try to keep the conversation going, if they just want to check in, that's okay! "
+        + "When outputting mathematical expressions, use valid LaTeX enclosed in double dollar signs ($$...$$). Use clear, readable formatting suitable for rendering. "
+        + "Don't use latex formatting style without the double dollar signs (&&...&&). If you don't want latex rendering, don't put something like \\cos! "
+        + "You can use multiple LaTeX blocks in one reply. Make use of that if a formula gets too long, because it isn't rendered correctly otherwise! ";
+        
+        return new JSONObject().put("role", "system").put("content", message);
+    }
+    
+    private static String getPersonalizedInformation(Conversation conversation) {
+        return "";
+    }
+
+    // Keep track of pancake mode
+    private boolean pancakeMode = false;
+    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private ScheduledFuture<?> schedule;
+
+    public void setPancakeMode(MessageChannelUnion channel) {
+        this.pancakeMode = true;
+        if (channel != null) schedule = scheduler.schedule(() -> {
+            eatPancake();
+            logger.debug("Pancake mode has been automatically disabled...");
+            // Creates info message. This is automatically skipped over in message reading (Conversation)
+            Levi.writeMessage(channel, "ℹ️ [INFO] Thanks for the pancake, it was very delicious!"
+                + "\n\nPancake mode has expired. You may re-enable it with /pancake"
+                + "\n\n🕒 This message will be removed after your next interaction");
+        }, 15, TimeUnit.MINUTES);
+    }
+
+    public void eatPancake() {
+        this.pancakeMode = false;
+    }
+
+    public boolean isPancakeMode() {
+        return pancakeMode;
+    }
+    
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("--- Message History: " + guildName + " - " + categoryName + " - " + channelName + " ---");
+        for (ConversationEntry entry : messages) {
+            sb.append(entry.toString() + "\n");
+        }
+        return sb.toString();
+    }
+    
+}
