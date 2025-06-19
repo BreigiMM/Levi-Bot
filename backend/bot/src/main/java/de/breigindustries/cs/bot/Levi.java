@@ -1,5 +1,6 @@
 package de.breigindustries.cs.bot;
 
+import java.io.File;
 import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
@@ -36,8 +37,14 @@ public class Levi extends ListenerAdapter {
         // Set up database
         DatabaseManager.ensureDatabaseExists();
 
+        // Create downloads directory if it doesn't exist already
+        File file = new File("downloads");
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+
         // Start and connect to discord
-        String token = dotenv.get("DISCORD_TOKEN");
+        String token = dotenv.get("DEV_TOKEN");
         logger.info("About to build JDA...");
         jda = JDABuilder.createDefault(token)
             .enableIntents(GatewayIntent.MESSAGE_CONTENT)
@@ -72,7 +79,7 @@ public class Levi extends ListenerAdapter {
         if (event.getAuthor().isBot()) return;
 
         Message message = event.getMessage();
-        String content = message.getContentRaw().toLowerCase();
+        String content = message.getContentDisplay();
         logger.info("Received a message from " + event.getAuthor().getEffectiveName() + ": {}", content);
 
         if (shouldReply(event)) {
