@@ -27,6 +27,11 @@ public class ChatGPTUtils {
                 return "Error: Levi is tired right now and can only think of catnip..";
             }
             JSONObject jsonResponse = new JSONObject(response.body().string());
+
+            // Debug the response model
+            String model = jsonResponse.getString("model");
+            logger.debug("Answered using model {}", model);
+
             String stringResponse = jsonResponse.getJSONArray("choices")
                 .getJSONObject(0)
                 .getJSONObject("message")

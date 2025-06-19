@@ -65,8 +65,9 @@ public class SlashCommandHandler extends ListenerAdapter {
             case "ping" -> event.reply("Pong!").setEphemeral(true).queue();
             case "menu" -> Menu.showMenu(event);
             case "pancake" -> {
-                long channelID = event.getChannelIdLong();
                 Conversation conversation = Conversation.getConversationByChannel(event.getChannel());
+                conversation.setPancakeMode();
+                event.reply("Set to pancake mode! Beware, with great power comes great responsibility :)").setEphemeral(true).queue();
             }
 
 

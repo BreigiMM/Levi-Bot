@@ -1,5 +1,8 @@
 package de.breigindustries.cs.bot.chatgpt;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.breigindustries.cs.bot.Levi;
 import de.breigindustries.cs.bot.database.ConversationRepository;
 import io.github.cdimascio.dotenv.Dotenv;
@@ -7,7 +10,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class AIInteraction {
 
-    // private static Logger logger = LoggerFactory.getLogger(AIInteraction.class);
+    private static Logger logger = LoggerFactory.getLogger(AIInteraction.class);
     private static int memoryLimit = Integer.parseInt(Dotenv.configure().load().get("MEMORY_LIMIT"));
 
     /**
@@ -21,6 +24,7 @@ public class AIInteraction {
         conversation.addEntryFromMessage(event.getMessage());
 
         Conversation channelConversation = Conversation.createEmptyConversationFromChannel(event.getChannel());
+        if (conversation.isPancakeMode()) channelConversation.setPancakeMode();
         Conversation.fillConversation(channelConversation, memoryLimit).thenAccept(filledConversation -> {
             String response = ChatGPTUtils.getChatbotResponse(channelConversation);
 
@@ -29,6 +33,7 @@ public class AIInteraction {
                 conversation.addEntryFromMessage(sentMessage);
                 channelConversation.addEntryFromMessage(sentMessage);
                 ConversationRepository.saveConversation(conversation);
+                logger.debug("Pancake mode of conversation: {}", conversation.isPancakeMode());
             });
         });
     }

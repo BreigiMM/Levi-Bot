@@ -66,7 +66,7 @@ public class ConversationEntry {
 
         List<Attachment> attachments = message.getAttachments();
         List<CompletableFuture<Void>> futures = new ArrayList<>();
-        logger.debug("Attachment count: {}", attachments.size());
+        // logger.debug("Attachment count: {}", attachments.size());
 
         for (Attachment attachment : attachments) {
             logger.debug("Attachment name: {}", attachment.getFileName());
