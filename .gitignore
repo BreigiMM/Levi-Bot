@@ -30,5 +30,8 @@ downloads/*
 *.sln
 *.sw?
 
-# Don't track effective poms
-effective-pom.xml
+# Don't track effective or other poms
+*-pom.xml
+
+# Generated code
+**/target/
