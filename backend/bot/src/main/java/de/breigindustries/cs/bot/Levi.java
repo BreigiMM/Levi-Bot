@@ -52,7 +52,7 @@ public class Levi extends ListenerAdapter {
         }
 
         // Start and connect to discord
-        String token = dotenv.get("DISCORD_TOKEN");
+        String token = dotenv.get("DEV_TOKEN");
         logger.info("About to build JDA...");
         jda = JDABuilder.createDefault(token)
             .enableIntents(GatewayIntent.MESSAGE_CONTENT)
