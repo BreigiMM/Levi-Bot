@@ -45,11 +45,12 @@
             <version>1.5.18</version>
             <scope>compile</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc -->
+        <!-- Spring Boot Parent -->
         <dependency>
-            <groupId>org.xerial</groupId>
-            <artifactId>sqlite-jdbc</artifactId>
-            <version>3.50.1.0</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-parent</artifactId>
+            <version>3.5.0</version>
+            <type>pom</type>
         </dependency>
     </dependencies>
 

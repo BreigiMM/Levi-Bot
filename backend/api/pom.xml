@@ -4,17 +4,36 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>de.breigindustries.cs</groupId>
-        <artifactId>backend</artifactId>
-        <version>1.0</version>
-    </parent>
+  <parent>
+    <groupId>de.breigindustries.cs</groupId>
+    <artifactId>backend</artifactId>
+    <version>1.0</version>
+  </parent>
 
-    <artifactId>api</artifactId>
-    <version>1.0-SNAPSHOT</version>
+  <artifactId>api</artifactId>
+  <version>1.0-SNAPSHOT</version>
 
-    <dependencies>
-        
-    </dependencies>
+  <dependencies>
+    <dependency>
+      <groupId>de.breigindustries.cs</groupId>
+      <artifactId>shared</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+      <version>3.5.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.xerial</groupId>
+      <artifactId>sqlite-jdbc</artifactId>
+      <version>3.50.1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.hibernate.orm</groupId>
+      <artifactId>hibernate-community-dialects</artifactId>
+      <version>7.0.2.Final</version>
+    </dependency>
+  </dependencies>
 
 </project>
