@@ -17,7 +17,7 @@ public class UserService {
     }
 
     public User createUser(String username) {
-        return userRepo.save(new User(username, 0));
+        return userRepo.save(new User(null, username, null, null, null));
     }
 
     public List<User> getAllUsers() {

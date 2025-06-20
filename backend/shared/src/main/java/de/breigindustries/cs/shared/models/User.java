@@ -6,20 +6,30 @@ import jakarta.persistence.*;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String username;
-    private int experience;
+    /** Username, unique identifier on discord, mutable. Display name is {@link #effectiveName effective name}*/
+    private String name;
+    /** Contains the global name if set, or the {@link #name name (username)} if global name is {@code null} */
+    private String effectiveName;
+    private String avatarUrl;
+    private String bannerUrl;
 
-    public User() {}
-
-    public User(String username, int experience) {
-        this.username = username;
-        this.experience = experience;
+    public User(Long id, String name, String effectiveName, String avatarUrl, String bannerUrl) {
+        this.id = id;
+        this.name = name;
+        this.effectiveName = effectiveName;
+        this.avatarUrl = avatarUrl;
+        this.bannerUrl = bannerUrl;
     }
 
-    public void setUsername(String username) { this.username = username; }
-    public String getUsername() { return username; }
-    public void setExperience(int experience) { this.experience = experience; }
-    public int getExperience() { return experience; }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public String getEffectiveName() { return effectiveName; }
+    public void setEffectiveName(String effectiveName) { this.effectiveName = effectiveName; }
+    public String getAvatarUrl() { return avatarUrl; }
+    public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
+    public String getBannerUrl() { return bannerUrl; }
+    public void setBannerUrl(String bannerUrl) { this.bannerUrl = bannerUrl; }
 }
