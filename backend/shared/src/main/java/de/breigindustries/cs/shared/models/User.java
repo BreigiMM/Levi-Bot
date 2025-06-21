@@ -13,6 +13,8 @@ public class User {
     private String effectiveName;
     private String avatarUrl;
     private String bannerUrl;
+    /** Custom-set description, is fed into the contex, differnt to {@link Memory memories} */
+    private String description;
 
     public User(Long id, String name, String effectiveName, String avatarUrl, String bannerUrl) {
         this.id = id;

@@ -7,7 +7,7 @@ public class Test {
     static {
 
         Guild guild = null;
-        var member = guild.getMember(null);
+        var role = guild.getRoles().get(Integer.MAX_VALUE);
 
     }
 }
