@@ -1,5 +1,7 @@
 package de.breigindustries.cs.shared.models;
 
+import java.util.Set;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -11,10 +13,20 @@ public class Member {
     private String name;
     @Column(name = "avatar_url")
     private String avatarUrl;
-    @Column(name = "user_id")
+    @ManyToOne
+    @JoinColumn(name = "user_id")
     private User user;
-    @Column(name = "guild_id")
+    @ManyToOne
+    @JoinColumn(name = "guild_id")
     private Guild guild;
+
+    @ManyToMany
+    @JoinTable(
+        name = "role_member",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles;
 
     public Member(Long id, String name, String avatarUrl, User user, Guild guild) {
         this.id = id;
@@ -29,5 +41,7 @@ public class Member {
     public String getAvatarUrl() { return avatarUrl; }
     public User getUser() { return user; }
     public Guild getGuild() { return guild; }
+
+    public Set<Role> getRoles() { return roles; }
 
 }

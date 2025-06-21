@@ -1,5 +1,7 @@
 package de.breigindustries.cs.shared.models;
 
+import java.util.List;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -11,11 +13,15 @@ public class Message {
     private Long timestamp;
     /** Contains formatted content (contentDisplay in JDA) */
     private String content;
-    @Column(name = "author_id")
+    @ManyToOne
+    @JoinColumn(name = "author_id")
     private User author;
     @ManyToOne
     @JoinColumn(name = "channel_id")
     private Channel channel;
+
+    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL)
+    private List<Attachment> attachments;
 
     public Message(Long id, Long timestamp, String content, User author, Channel channel) {
         this.id = id;
@@ -30,5 +36,7 @@ public class Message {
     public String getContent() { return content; }
     public User getAuthor() { return author; }
     public Channel getChannel() { return channel; }
+
+    public List<Attachment> getAttachments() { return attachments; }
     
 }

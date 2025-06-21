@@ -10,7 +10,8 @@ public class Memory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String content;
-    @Column(name = "user_id")
+    @ManyToOne
+    @JoinColumn(name = "user_id")
     private User user;
 
     public Memory(String content, User user) {

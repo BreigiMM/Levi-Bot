@@ -20,7 +20,7 @@ public class Channel {
     @JoinColumn(name = "guild_id")
     private Guild guild;
 
-    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "channel", cascade = CascadeType.ALL)
     private List<Message> messages;
 
     public Channel(Long id, String name, String type, Category category, Guild guild) {
@@ -36,5 +36,7 @@ public class Channel {
     public String getType() { return type; }
     public Category getCategory() { return category; }
     public Guild getGuild() { return guild; }
+
+    public List<Message> getMessages() { return messages; }
 
 }

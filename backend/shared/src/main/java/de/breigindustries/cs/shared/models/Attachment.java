@@ -15,7 +15,8 @@ public class Attachment {
     private String contentType;
     private Integer size;
     private byte[] data;
-    @Column(name = "message_id")
+    @ManyToOne
+    @JoinColumn(name = "message_id")
     private Message message;
 
     public Attachment(Long id, String fileName, String description, String contentType, Integer size, byte[] data, Message message) {

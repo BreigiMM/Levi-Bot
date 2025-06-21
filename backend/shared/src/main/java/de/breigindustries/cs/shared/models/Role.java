@@ -1,5 +1,7 @@
 package de.breigindustries.cs.shared.models;
 
+import java.util.Set;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -11,8 +13,12 @@ public class Role {
     private String name;
     /** Hex string of the color. Can be set with {@code String.format("#%06X", role.getColorRaw())} */
     private String color;
-    @Column(name = "guild_id")
+    @ManyToOne
+    @JoinColumn(name = "guild_id")
     private Guild guild;
+
+    @ManyToMany(mappedBy = "roles")
+    private Set<Member> members;
 
     public Role(Long id, String name, String color, Guild guild) {
         this.id = id;
@@ -25,5 +31,7 @@ public class Role {
     public String getName() { return name; }
     public String getColor() { return color; }
     public Guild getGuild() { return guild; }
+
+    public Set<Member> getMembers() { return members; }
     
 }

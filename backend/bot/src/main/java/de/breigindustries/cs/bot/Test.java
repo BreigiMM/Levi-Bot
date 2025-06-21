@@ -8,6 +8,7 @@ public class Test {
 
         Guild guild = null;
         var role = guild.getRoles().get(Integer.MAX_VALUE);
+        guild.getMembers().get(0).getRoles();
 
     }
 }

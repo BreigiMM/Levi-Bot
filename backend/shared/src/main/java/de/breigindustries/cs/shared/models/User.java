@@ -1,5 +1,7 @@
 package de.breigindustries.cs.shared.models;
 
+import java.util.List;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -19,8 +21,14 @@ public class User {
     @Column(name = "banner_url")
     private String bannerUrl;
 
-    @OneToOne(mappedBy = "user_description", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private UserDescription userDescription;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Memory> memories;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Message> messages;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Member> members;
 
     public User(Long id, String username, String displayName, String avatarUrl, String bannerUrl) {
         this.id = id;
@@ -37,5 +45,8 @@ public class User {
     public String getBannerUrl() { return bannerUrl; }
 
     public UserDescription getUserDescription() { return userDescription; }
+    public List<Memory> getMemories() { return memories; }
+    public List<Message> getMessages() { return messages; }
+    public List<Member> getMembers() { return members; }
     
 }

@@ -15,7 +15,7 @@ public class Category {
     @JoinColumn(name = "guild_id")
     private Guild guild;
 
-    @OneToMany(mappedBy = "channel", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
     private List<Channel> channels;
 
     public Category(Long id, String name, Guild guild) {
