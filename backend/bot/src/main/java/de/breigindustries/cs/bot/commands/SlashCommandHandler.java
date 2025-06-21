@@ -71,7 +71,7 @@ public class SlashCommandHandler extends ListenerAdapter {
         Conversation.fillConversation(checkConversation, 100);
 
         // Access control to Pancake mode
-        Set<String> pancakeUsers = Set.of("451369381826658336", "692837354775380011");
+        Set<String> pancakeUsers = Set.of("451369381826658336", "692837354775380011", "1284454074493702227");
 
         switch (event.getName()) {
             // Bot commands
