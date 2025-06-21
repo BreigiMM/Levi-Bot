@@ -3,36 +3,37 @@ package de.breigindustries.cs.shared.models;
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "attachment")
 public class Attachment {
     
     @Id
     private Long id;
+    @Column(name = "file_name")
     private String fileName;
     private String description;
+    @Column(name = "content_type")
     private String contentType;
     private Integer size;
     private byte[] data;
+    @Column(name = "message_id")
+    private Message message;
 
-    public Attachment(Long id, String fileName, String description, String contentType, Integer size, byte[] data) {
+    public Attachment(Long id, String fileName, String description, String contentType, Integer size, byte[] data, Message message) {
         this.id = id;
         this.fileName = fileName;
         this.description = description;
         this.contentType = contentType;
         this.size = size;
         this.data = data;
+        this.message = message;
     }
 
     public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
     public String getFileName() { return fileName; }
-    public void setFileName(String fileName) { this.fileName = fileName; }
     public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
     public String getContentType() { return contentType; }
-    public void setContentType(String contentType) { this.contentType = contentType; }
     public Integer getSize() { return size; }
-    public void setSize(Integer size) { this.size = size; }
     public byte[] getData() { return data; }
-    public void setData(byte[] data) { this.data = data; }
+    public Message getMessage() { return message; }
 
 }

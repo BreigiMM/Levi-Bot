@@ -3,6 +3,7 @@ package de.breigindustries.cs.shared.models;
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "role")
 public class Role {
     
     @Id
@@ -10,6 +11,7 @@ public class Role {
     private String name;
     /** Hex string of the color. Can be set with {@code String.format("#%06X", role.getColorRaw())} */
     private String color;
+    @Column(name = "guild_id")
     private Guild guild;
 
     public Role(Long id, String name, String color, Guild guild) {
@@ -20,12 +22,8 @@ public class Role {
     }
 
     public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
     public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
     public String getColor() { return color; }
-    public void setColor(String color) { this.color = color; }
     public Guild getGuild() { return guild; }
-    public void setGuild(Guild guild) { this.guild = guild; }
     
 }

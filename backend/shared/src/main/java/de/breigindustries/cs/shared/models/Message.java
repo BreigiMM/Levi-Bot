@@ -3,6 +3,7 @@ package de.breigindustries.cs.shared.models;
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "message")
 public class Message {
     
     @Id
@@ -10,7 +11,9 @@ public class Message {
     private Long timestamp;
     /** Contains formatted content (contentDisplay in JDA) */
     private String content;
+    @Column(name = "author_id")
     private User author;
+    @Column(name = "channel_id")
     private Channel channel;
 
     public Message(Long id, Long timestamp, String content, User author, Channel channel) {
@@ -22,14 +25,9 @@ public class Message {
     }
 
     public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
     public Long getTimestamp() { return timestamp; }
-    public void setTimestamp(Long timestamp) { this.timestamp = timestamp; }
     public String getContent() { return content; }
-    public void setContent(String content) { this.content = content; }
     public User getAuthor() { return author; }
-    public void setAuthor(User author) { this.author = author; }
     public Channel getChannel() { return channel; }
-    public void setChannel(Channel channel) { this.channel = channel; }
     
 }

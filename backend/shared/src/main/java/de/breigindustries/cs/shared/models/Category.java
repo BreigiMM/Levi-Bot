@@ -3,11 +3,13 @@ package de.breigindustries.cs.shared.models;
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "category")
 public class Category {
  
     @Id
     private Long id;
     private String name;
+    @Column(name = "guild_id")
     private Guild guild;
 
     public Category(Long id, String name, Guild guild) {
@@ -17,10 +19,7 @@ public class Category {
     }
 
     public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
     public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
     public Guild getGuild() { return guild; }
-    public void setGuild(Guild guild) { this.guild = guild; }
     
 }

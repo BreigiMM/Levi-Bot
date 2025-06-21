@@ -3,39 +3,34 @@ package de.breigindustries.cs.shared.models;
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "user")
 public class User {
 
     @Id
+    @Column(nullable = false, unique = true)
     private Long id;
-    /** Username, unique identifier on discord, mutable. Display name is {@link #effectiveName effective name}*/
-    private String name;
-    /** Contains the global name if set, or the {@link #name name (username)} if global name is {@code null} */
-    private String effectiveName;
+    /** Username, unique identifier on discord, mutable. Display name is {@link #displayName effective name}*/
+    private String username;
+    /** Contains the global name if set, or the {@link #username name (username)} if global name is {@code null} */
+    @Column(name = "display_name")
+    private String displayName;
+    @Column(name = "avatar_url")
     private String avatarUrl;
+    @Column(name = "banner_url")
     private String bannerUrl;
-    /** Custom-set description, is fed into the contex, differnt to {@link Memory memories} */
-    private String description;
 
-    public User(Long id, String name, String effectiveName, String avatarUrl, String bannerUrl, String description) {
+    public User(Long id, String username, String displayName, String avatarUrl, String bannerUrl) {
         this.id = id;
-        this.name = name;
-        this.effectiveName = effectiveName;
+        this.username = username;
+        this.displayName = displayName;
         this.avatarUrl = avatarUrl;
         this.bannerUrl = bannerUrl;
-        this.description = description;
     }
 
     public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-    public String getEffectiveName() { return effectiveName; }
-    public void setEffectiveName(String effectiveName) { this.effectiveName = effectiveName; }
+    public String getUsername() { return username; }
+    public String getDisplayName() { return displayName; }
     public String getAvatarUrl() { return avatarUrl; }
-    public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
     public String getBannerUrl() { return bannerUrl; }
-    public void setBannerUrl(String bannerUrl) { this.bannerUrl = bannerUrl; }
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
     
 }

@@ -3,11 +3,13 @@ package de.breigindustries.cs.shared.models;
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "guild")
 public class Guild {
     
     @Id
     private Long id;
     private String name;
+    @Column(name = "icon_url")
     private String iconUrl;
 
     public Guild(Long id, String name, String iconUrl) {
@@ -17,10 +19,7 @@ public class Guild {
     }
 
     public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
     public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
     public String getIconUrl() { return iconUrl; }
-    public void setIconUrl(String iconUrl) { this.iconUrl = iconUrl; }
     
 }

@@ -20,7 +20,6 @@ public class Application {
         UserService userService = context.getBean(UserService.class);
 
         // Use the service
-        userService.createUser("Breigi");
-        System.out.println(userService.getAllUsers().get(0).getName());
+        
     }
 }

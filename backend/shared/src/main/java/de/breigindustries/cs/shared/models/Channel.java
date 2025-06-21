@@ -3,6 +3,7 @@ package de.breigindustries.cs.shared.models;
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "channel")
 public class Channel {
     
     @Id
@@ -10,7 +11,9 @@ public class Channel {
     private String name;
     /** Matches the ChannelType names of JDA */
     private String type;
+    @Column(name = "category_id")
     private Category category;
+    @Column(name = "guild_id")
     private Guild guild;
 
     public Channel(Long id, String name, String type, Category category, Guild guild) {
@@ -22,14 +25,9 @@ public class Channel {
     }
 
     public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
     public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
     public String getType() { return type; }
-    public void setType(String type) { this.type = type; }
     public Category getCategory() { return category; }
-    public void setCategory(Category category) { this.category = category; }
     public Guild getGuild() { return guild; }
-    public void setGuild(Guild guild) { this.guild = guild; }
 
 }
