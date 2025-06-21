@@ -31,4 +31,5 @@ public class Message {
     public void setAuthor(User author) { this.author = author; }
     public Channel getChannel() { return channel; }
     public void setChannel(Channel channel) { this.channel = channel; }
+    
 }

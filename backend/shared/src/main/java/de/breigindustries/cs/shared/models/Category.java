@@ -22,4 +22,5 @@ public class Category {
     public void setName(String name) { this.name = name; }
     public Guild getGuild() { return guild; }
     public void setGuild(Guild guild) { this.guild = guild; }
+    
 }
