@@ -16,12 +16,13 @@ public class User {
     /** Custom-set description, is fed into the contex, differnt to {@link Memory memories} */
     private String description;
 
-    public User(Long id, String name, String effectiveName, String avatarUrl, String bannerUrl) {
+    public User(Long id, String name, String effectiveName, String avatarUrl, String bannerUrl, String description) {
         this.id = id;
         this.name = name;
         this.effectiveName = effectiveName;
         this.avatarUrl = avatarUrl;
         this.bannerUrl = bannerUrl;
+        this.description = description;
     }
 
     public Long getId() { return id; }
@@ -34,5 +35,7 @@ public class User {
     public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
     public String getBannerUrl() { return bannerUrl; }
     public void setBannerUrl(String bannerUrl) { this.bannerUrl = bannerUrl; }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
     
 }
