@@ -1,5 +1,7 @@
 package de.breigindustries.cs.shared.models;
 
+import java.util.List;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -11,10 +13,15 @@ public class Channel {
     private String name;
     /** Matches the ChannelType names of JDA */
     private String type;
-    @Column(name = "category_id")
+    @ManyToOne
+    @JoinColumn(name = "category_id")
     private Category category;
-    @Column(name = "guild_id")
+    @ManyToOne
+    @JoinColumn(name = "guild_id")
     private Guild guild;
+
+    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL)
+    private List<Message> messages;
 
     public Channel(Long id, String name, String type, Category category, Guild guild) {
         this.id = id;

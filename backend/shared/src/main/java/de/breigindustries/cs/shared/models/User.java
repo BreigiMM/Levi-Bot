@@ -19,6 +19,9 @@ public class User {
     @Column(name = "banner_url")
     private String bannerUrl;
 
+    @OneToOne(mappedBy = "user_description", cascade = CascadeType.ALL)
+    private UserDescription userDescription;
+
     public User(Long id, String username, String displayName, String avatarUrl, String bannerUrl) {
         this.id = id;
         this.username = username;
@@ -32,5 +35,7 @@ public class User {
     public String getDisplayName() { return displayName; }
     public String getAvatarUrl() { return avatarUrl; }
     public String getBannerUrl() { return bannerUrl; }
+
+    public UserDescription getUserDescription() { return userDescription; }
     
 }

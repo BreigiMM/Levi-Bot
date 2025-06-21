@@ -10,7 +10,8 @@ public class UserDescription {
     @Id
     private Long id;
     private String content;
-    @Column(name = "user_id")
+    @OneToOne
+    @JoinColumn(name = "user_id", unique = true)
     private User user;
 
     public UserDescription(Long id, String content, User user) {

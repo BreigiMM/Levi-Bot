@@ -13,7 +13,8 @@ public class Message {
     private String content;
     @Column(name = "author_id")
     private User author;
-    @Column(name = "channel_id")
+    @ManyToOne
+    @JoinColumn(name = "channel_id")
     private Channel channel;
 
     public Message(Long id, Long timestamp, String content, User author, Channel channel) {

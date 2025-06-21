@@ -1,5 +1,7 @@
 package de.breigindustries.cs.shared.models;
 
+import java.util.List;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -9,8 +11,12 @@ public class Category {
     @Id
     private Long id;
     private String name;
-    @Column(name = "guild_id")
+    @ManyToOne
+    @JoinColumn(name = "guild_id")
     private Guild guild;
+
+    @OneToMany(mappedBy = "channel", cascade = CascadeType.ALL)
+    private List<Channel> channels;
 
     public Category(Long id, String name, Guild guild) {
         this.id = id;
@@ -21,5 +27,7 @@ public class Category {
     public Long getId() { return id; }
     public String getName() { return name; }
     public Guild getGuild() { return guild; }
+    
+    public List<Channel> getChannels() { return channels; }
     
 }
