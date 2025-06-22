@@ -25,7 +25,7 @@ public class User {
     private UserDescription userDescription;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Memory> memories;
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
     private List<Message> messages;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Member> members;

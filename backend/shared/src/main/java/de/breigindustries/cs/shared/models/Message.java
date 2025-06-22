@@ -22,6 +22,10 @@ public class Message {
 
     @OneToMany(mappedBy = "message", cascade = CascadeType.ALL)
     private List<Attachment> attachments;
+    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL)
+    private List<Embed> embeds;
+
+    public Message() {}
 
     public Message(Long id, Long timestamp, String content, User author, Channel channel) {
         this.id = id;
@@ -38,5 +42,6 @@ public class Message {
     public Channel getChannel() { return channel; }
 
     public List<Attachment> getAttachments() { return attachments; }
+    public List<Embed> getEmbeds() { return embeds; }
     
 }

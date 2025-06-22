@@ -12,7 +12,7 @@ public class EmbedField {
     private Integer fieldIndex;
     /** ID of the message the embed is attached to */
     @Id
-    private Long id;
+    private Message id;
     /** Index of the embed inside the message */
     @Id
     @Column(name = "embed_index")
@@ -22,7 +22,7 @@ public class EmbedField {
     @Column(name = "embed_id")
     private Embed embed;
 
-    public EmbedField(Integer fieldIndex, Long id, Integer embedIndex, String name, String value, Embed embed) {
+    public EmbedField(Integer fieldIndex, Message id, Integer embedIndex, String name, String value, Embed embed) {
         this.fieldIndex = fieldIndex;
         this.id = id;
         this.embedIndex = embedIndex;
@@ -32,7 +32,7 @@ public class EmbedField {
     }
 
     public Integer getFieldIndex() { return fieldIndex; }
-    public Long getId() { return id; }
+    public Message getId() { return id; }
     public Integer getEmbedIndex() { return embedIndex; }
     public String getName() { return name; }
     public String getValue() { return value; }

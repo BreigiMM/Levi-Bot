@@ -7,10 +7,9 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import de.breigindustries.cs.api.services.UserService;
+import de.breigindustries.cs.shared.models.User;
 
 @SpringBootApplication(scanBasePackages = "de.breigindustries.cs")
-@EnableJpaRepositories(basePackages = "de.breigindustries.cs.shared.repositories")
-@EntityScan(basePackages = "de.breigindustries.cs.shared.models")
 public class Application {
     public static void main(String[] args) {
         // Start spring and get the context
@@ -20,6 +19,10 @@ public class Application {
         UserService userService = context.getBean(UserService.class);
 
         // Use the service
+        User user = new User(1L, "breigi", "Mathis", "url", "url");
+
+        userService.saveUser(user);
+        System.out.println(userService.getAllUsers().get(0).getDisplayName());
         
     }
 }
